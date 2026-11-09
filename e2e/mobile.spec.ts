@@ -37,10 +37,26 @@ test.describe("mobile layout", () => {
     for (const { path } of ROUTES) {
         test(`${path} has no horizontal overflow`, async ({ page }) => {
             await page.goto(path)
-            const overflow = await page.evaluate(
-                () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-            )
-            expect(overflow).toBeLessThanOrEqual(0)
+            // On failure, name the elements sticking out so CI logs are actionable.
+            const report = await page.evaluate(() => {
+                const vw = document.documentElement.clientWidth
+                const overflow = document.documentElement.scrollWidth - vw
+                const offenders: string[] = []
+                document.querySelectorAll("body *").forEach((el) => {
+                    // These scroll or clip internally and can't widen the page.
+                    if (el.closest(".spec-table-wrap, .leaflet-container, .mobile-menu")) return
+                    const b = el.getBoundingClientRect()
+                    if (b.width > 0 && b.right > vw + 1) {
+                        const cls = (el as HTMLElement).className
+                        offenders.push(`${el.tagName.toLowerCase()}.${cls} right=${Math.round(b.right)}`)
+                    }
+                })
+                return { overflow, vw, offenders: offenders.slice(0, 10) }
+            })
+            expect(
+                report.overflow,
+                `viewport ${report.vw}px, page ${report.overflow}px too wide. Elements past the edge:\n${report.offenders.join("\n")}`,
+            ).toBeLessThanOrEqual(0)
         })
     }
 

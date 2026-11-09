@@ -181,7 +181,7 @@
 
 .inner-hero { min-height: 570px; display: grid; grid-template-columns: 1fr .82fr; gap: 70px; align-items: center; padding-block: 56px 70px; }
 .inner-hero.not-found { min-height: 60vh; grid-template-columns: 1fr; }
-.inner-hero__copy h1 { max-width: 720px; margin: 18px 0 23px; font-size: clamp(48px, 5vw, 72px); font-weight: 800; }
+.inner-hero__copy h1 { max-width: 720px; overflow-wrap: break-word; margin: 18px 0 23px; font-size: clamp(48px, 5vw, 72px); font-weight: 800; }
 .inner-hero__copy > p { max-width: 650px; font-size: 18px; }
 .inner-hero__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 31px; }
 .inner-hero__image { position: relative; height: 470px; padding: 8px; border-radius: 28px; background: var(--soft); transform: rotate(1.4deg); }
@@ -349,6 +349,8 @@
   .inner-hero__actions { flex-direction: column; }
   .inner-hero__image { height: 305px; }
   .inner-hero__copy > p { font-size: 16px; }
+  /* "Straightforward" (Luigong page) is ~8em wide; 12vw overflowed phones <=412px. */
+  .inner-hero__copy h1 { font-size: clamp(30px, 10vw, 66px); }
   .chip-grid { grid-template-columns: 1fr 1fr; }
   .chip-grid > * { border-radius: 14px; }
   .process-grid { grid-template-columns: 1fr; }
