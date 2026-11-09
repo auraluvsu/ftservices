@@ -2,8 +2,16 @@ name: Tests
 
 on:
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - ".github/workflows/claude-review.yml"
   push:
     branches: [master]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - ".github/workflows/claude-review.yml"
 
 concurrency:
   group: tests-${{ github.ref }}
