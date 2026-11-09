@@ -18,9 +18,13 @@ Notes:
 - The From address does not need to be a real mailbox; Reply-To already points at the customer.
 - Free tier: ~3,000 emails/month, 100/day.
 
-## Add frontend testing
+## Finish frontend testing
 
-See `TESTING_PLAN.md`.
+E2E suite and CI are done (see `TESTING_PLAN.md`). Remaining:
+
+- [ ] API handler unit tests (after the Resend migration)
+- [ ] `seo.spec.ts` (titles, favicon, no console errors)
+- [ ] Optional: Vitest component tests, visual regression
 
 ## Accessibility: colour contrast (found by e2e axe scan)
 

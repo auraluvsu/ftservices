@@ -1,0 +1,67 @@
+# FT Services
+
+Website for FT Services, a forklift sales, hire and servicing business in Hayes. Built with React 19, Vite 8 and Tailwind CSS v4, deployed on Vercel.
+
+## Getting started
+
+Requires Node 22 (see `.mise.toml`).
+
+```sh
+npm ci
+npm run dev
+```
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Production build into `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run typecheck` | Type-check with `tsc --noEmit` |
+| `npm run format` | Format with oxfmt |
+| `npm run test:e2e` | Run the Playwright suite on all projects |
+| `npm run test:e2e:local` | Same, but skips WebKit (for distros missing its system libraries) |
+| `npm run test:e2e:ui` | Playwright UI mode |
+| `npm run test:e2e:report` | Open the last HTML report |
+
+## Project layout
+
+```
+src/main.tsx      entrypoint
+src/App.tsx       all pages and components, with hand-rolled client-side routing
+src/index.css     global CSS and Tailwind import
+api/inquiry.ts    Vercel serverless function behind the quote form (POST /api/inquiry)
+e2e/              Playwright specs
+public/           images and favicon
+vercel.json       build config and SPA rewrite
+```
+
+### Routing
+
+Routing is client-side (`Link` + `popstate`) with no router library. Routes: `/`, `/new-forklifts`, `/used-forklifts`, `/diesel-forklifts`, `/electric-forklifts`, `/forklift-services`, `/forklift-hire`, `/luigong-forklifts`, `/contact`. Anything else renders the 404 page. `vercel.json` rewrites every non-`/api/` path to `index.html` so deep links and refreshes work.
+
+### Quote form API
+
+`POST /api/inquiry` takes JSON `{ name, email, phone, message? }`. It returns `405` for other methods, `400` if name, a valid email or phone is missing, `200` on success and `500` if sending fails. Input is length-clamped, HTML-escaped and stripped of header-injection characters.
+
+**Email delivery is not live yet.** The handler currently sends through Ethereal, a fake SMTP service, so enquiries are captured but never delivered. The planned switch to Resend is in [`todo.md`](todo.md). Optional env vars: `INQUIRY_TO` (recipient, defaults to `mike@ftserviceshayes.com`), `ETHEREAL_USER` and `ETHEREAL_PASS`.
+
+## Testing
+
+End-to-end tests use Playwright with axe-core for accessibility. They run against the production build (`npm run build && npm run preview`) on Chromium, Firefox, WebKit, Pixel 7 and iPhone 14. `/api/inquiry` is always mocked, so tests never send email. Set `BASE_URL` to test an already-running deployment instead.
+
+There are no unit tests yet. See [`TESTING_PLAN.md`](TESTING_PLAN.md) for the plan and current status.
+
+## CI
+
+- `.github/workflows/test.yml` runs typecheck, build and the full Playwright suite on pull requests and pushes to `master`, and uploads the Playwright report.
+- `.github/workflows/claude-review.yml` has Claude review each pull request, posting inline comments and a summary. Comment `@claude` on a PR to trigger it again. It needs the `CLAUDE_CODE_OAUTH_TOKEN` repository secret.
+
+## Contributing notes
+
+See [`AGENTS.md`](AGENTS.md) for conventions used by AI coding agents (also loaded via `CLAUDE.md`). Open work is tracked in [`todo.md`](todo.md).
+
+## License
+
+Released under the GNU General Public License. See [`LICENSE`](LICENSE).
