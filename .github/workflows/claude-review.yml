@@ -9,7 +9,7 @@ on:
 jobs:
   review:
     if: |
-      github.event_name == 'pull_request' || 
+      github.event_name == 'pull_request' ||
       (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@claude'))
     runs-on: ubuntu-latest
     permissions:
@@ -18,16 +18,25 @@ jobs:
       issues: write
       id-token: write
     steps:
+      # issue_comment events run against the default branch, so check out the PR head explicitly.
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event_name == 'issue_comment' && format('refs/pull/{0}/head', github.event.issue.number) || '' }}
           fetch-depth: 1
 
       - name: Claude review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Agent mode does not post for us; the agent needs explicit tools to comment.
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"
           prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+
             Review this pull request for correctness, security, and code quality.
             If no bugs or errors are found, comment on the good design choices and why they are good.
-            Leave inline comments for specific issues and a short summary comment.
+            Leave inline comments for specific issues (using the inline comment tool) and post a short
+            summary comment with `gh pr comment`.
