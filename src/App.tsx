@@ -1,4 +1,4 @@
-import { FormEvent, ReactNode, useEffect, useRef, useState } from "react"
+import { FormEvent, ReactNode, useEffect, useId, useRef, useState } from "react"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet"
@@ -134,16 +134,19 @@ function Link({
     className = "",
     children,
     onClick,
+    "aria-label": ariaLabel,
 }: {
     to: string
     className?: string
     children: ReactNode
     onClick?: () => void
+    "aria-label"?: string
 }) {
     return (
         <a
             href={to}
             className={className}
+            aria-label={ariaLabel}
             onClick={(event) => {
                 event.preventDefault()
                 goTo(to)
@@ -435,6 +438,7 @@ function SectionHead({
 }
 
 function QuoteForm({ compact = false }: { compact?: boolean }) {
+    const uid = useId()
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [sent, setSent] = useState(false)
     const [sending, setSending] = useState(false)
@@ -495,9 +499,9 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
             noValidate
         >
             <div className="field">
-                <label htmlFor={`name-${compact}`}>Name</label>
+                <label htmlFor={`${uid}-name`}>Name</label>
                 <input
-                    id={`name-${compact}`}
+                    id={`${uid}-name`}
                     name="name"
                     placeholder="Your name"
                     aria-invalid={!!errors.name}
@@ -505,9 +509,9 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
                 {errors.name && <span className="field__error">{errors.name}</span>}
             </div>
             <div className="field">
-                <label htmlFor={`email-${compact}`}>Work email</label>
+                <label htmlFor={`${uid}-email`}>Work email</label>
                 <input
-                    id={`email-${compact}`}
+                    id={`${uid}-email`}
                     name="email"
                     type="email"
                     placeholder="you@company.co.uk"
@@ -516,9 +520,9 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
                 {errors.email && <span className="field__error">{errors.email}</span>}
             </div>
             <div className="field">
-                <label htmlFor={`phone-${compact}`}>Phone</label>
+                <label htmlFor={`${uid}-phone`}>Phone</label>
                 <input
-                    id={`phone-${compact}`}
+                    id={`${uid}-phone`}
                     name="phone"
                     type="tel"
                     placeholder="Your phone number"
@@ -528,9 +532,9 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
             </div>
             {!compact && (
                 <div className="field field--wide">
-                    <label htmlFor="message">How can we help?</label>
+                    <label htmlFor={`${uid}-message`}>How can we help?</label>
                     <textarea
-                        id="message"
+                        id={`${uid}-message`}
                         name="message"
                         rows={4}
                         placeholder="Tell us what you need"
@@ -1082,6 +1086,38 @@ function PageHero({
     )
 }
 
+function NotFoundPage() {
+    useEffect(() => {
+        const previous = document.title
+        document.title = "Page not found | FT Services"
+        return () => {
+            document.title = previous
+        }
+    }, [])
+    return (
+        <main>
+            <section className="inner-hero page-shell not-found">
+                <div className="inner-hero__copy">
+                    <span className="eyebrow">404</span>
+                    <h1>Page not found</h1>
+                    <p>
+                        Sorry, we couldn’t find the page you were looking for. It may have
+                        moved, or the address may be mistyped.
+                    </p>
+                    <div className="inner-hero__actions">
+                        <Link className="button button--primary button--large" to="/">
+                            Back to home <Icon name="arrow" />
+                        </Link>
+                        <Link className="button button--ghost button--large" to="/contact">
+                            Contact us
+                        </Link>
+                    </div>
+                </div>
+            </section>
+        </main>
+    )
+}
+
 function StickyQuote() {
     return (
         <aside className="sticky-quote">
@@ -1317,7 +1353,12 @@ function LuigongPage() {
                         />
                     </Reveal>
                     <Reveal>
-                        <div className="spec-table-wrap">
+                        <div
+                            className="spec-table-wrap"
+                            role="region"
+                            aria-label="Luigong model specifications"
+                            tabIndex={0}
+                        >
                             <table className="spec-table">
                                 <thead>
                                     <tr>
@@ -1627,10 +1668,8 @@ export default function App() {
     else if (path === "/luigong-forklifts") page = <LuigongPage />
     else if (path === "/forklift-hire") page = <HirePage />
     else if (path === "/contact") page = <ContactPage />
-    else
-        page = (
-            <StandardInnerPage data={pageData[path] || pageData["/new-forklifts"]} />
-        )
+    else if (pageData[path]) page = <StandardInnerPage data={pageData[path]} />
+    else page = <NotFoundPage />
 
     return (
         <>
