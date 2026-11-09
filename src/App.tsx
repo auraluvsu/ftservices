@@ -437,7 +437,9 @@ function SectionHead({
 function QuoteForm({ compact = false }: { compact?: boolean }) {
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [sent, setSent] = useState(false)
-    const submit = (e: FormEvent<HTMLFormElement>) => {
+    const [sending, setSending] = useState(false)
+    const [submitError, setSubmitError] = useState("")
+    const submit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const data = new FormData(e.currentTarget)
         const next: Record<string, string> = {}
@@ -448,7 +450,24 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
         if (!String(data.get("phone") || "").trim())
             next.phone = "Please enter your phone number."
         setErrors(next)
-        if (!Object.keys(next).length) setSent(true)
+        setSubmitError("")
+        if (Object.keys(next).length) return
+        setSending(true)
+        try {
+            const res = await fetch("/api/inquiry", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(Object.fromEntries(data)),
+            })
+            if (!res.ok) throw new Error(String(res.status))
+            setSent(true)
+        } catch {
+            setSubmitError(
+                "Sorry, something went wrong. Please try again or email mike@ftserviceshayes.com.",
+            )
+        } finally {
+            setSending(false)
+        }
     }
     if (sent)
         return (
@@ -518,8 +537,17 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
                     />
                 </div>
             )}
-            <button className="button button--primary form-submit" type="submit">
-                Request a free quote <Icon name="arrow" />
+            {submitError && (
+                <span className="field__error" role="alert">
+                    {submitError}
+                </span>
+            )}
+            <button
+                className="button button--primary form-submit"
+                type="submit"
+                disabled={sending}
+            >
+                {sending ? "Sending…" : "Request a free quote"} <Icon name="arrow" />
             </button>
             <p className="form-note">
                 No pressure, no obligation. Just helpful advice.
