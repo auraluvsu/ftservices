@@ -2,7 +2,9 @@
 
 ## Context
 
-The site is a single 1,642-line `src/App.tsx` (React 19 + Vite 8 + Tailwind v4) with hand-rolled client-side routing (`goTo` + `popstate`, `Link` component) and one serverless endpoint (`api/inquiry.ts`). There are no tests, no test scripts, and no CI beyond the Claude review workflow. The highest-risk features are the quote form (sends leads), navigation/routing, the responsive header, and the Leaflet map.
+The site is a single large `src/App.tsx` (React 19 + Vite 8 + Tailwind v4) with hand-rolled client-side routing (`Link` + `popstate`) and one serverless endpoint (`api/inquiry.ts`). The highest-risk features are the quote form (sends leads), navigation/routing, the responsive header, and the Leaflet map.
+
+> **Status:** this was written as a plan and is now partly implemented. The e2e suite and CI are in place; unit tests are deferred. See "Decisions and status" at the bottom for what is done. Phases below describe the original plan, including parts we chose not to do yet.
 
 ## Tooling decision
 
@@ -124,4 +126,6 @@ Add `.github/workflows/test.yml` (alongside `claude-review.yml`), on `pull_reque
 - Done: Vercel SPA rewrite, `useId()` form ids, Playwright config, `e2e/` specs (navigation, 404, quote-form, mobile, map, accessibility, health).
 - Done: `.github/workflows/test.yml` (typecheck + build, and e2e on all browsers with report upload).
 - Not done yet: API handler unit tests (deferred until the Resend migration, see `todo.md`).
+- Not done yet: `seo.spec.ts` and the `Escape`-closes-menu keyboard test.
+- Known gap: the axe colour-contrast check is `test.fixme` in `e2e/accessibility.spec.ts` until the contrast fixes in `todo.md` land.
 - Local runs: `npm run test:e2e:local` skips WebKit (this Fedora box lacks libicu 74). CI runs every project.
