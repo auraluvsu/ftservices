@@ -122,5 +122,6 @@ Add `.github/workflows/test.yml` (alongside `claude-review.yml`), on `pull_reque
 - E2E carries coverage for now; the component split and Vitest unit tests are deferred. ✅ (decided)
 - Screenshot comparisons: skipped for now. ✅ (decided)
 - Done: Vercel SPA rewrite, `useId()` form ids, Playwright config, `e2e/` specs (navigation, 404, quote-form, mobile, map, accessibility, health).
-- Not done yet: `.github/workflows/test.yml` (Phase 4), API handler unit tests (deferred until the Resend migration, see `todo.md`).
+- Done: `.github/workflows/test.yml` (typecheck + build, and e2e on all browsers with report upload).
+- Not done yet: API handler unit tests (deferred until the Resend migration, see `todo.md`).
 - Local runs: `npm run test:e2e:local` skips WebKit (this Fedora box lacks libicu 74). CI runs every project.
