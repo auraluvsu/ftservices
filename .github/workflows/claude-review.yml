@@ -3,9 +3,14 @@ name: Claude Review
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
 
 jobs:
   review:
+    if: |
+      github.event_name == 'pull_request' || 
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@claude'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -24,5 +29,5 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             Review this pull request for correctness, security, and code quality.
-            Follow the conventions in CLAUDE.md. Leave inline comments for specific
-            issues and a short summary comment.
+            If no bugs or errors are found, comment on the good design choices and why they are good.
+            Leave inline comments for specific issues and a short summary comment.
