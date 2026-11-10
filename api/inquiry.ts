@@ -159,12 +159,14 @@ function getRatelimit() {
     }))
 }
 
-function clientIp(req: VercelRequest) {
+// Prefer x-real-ip: Vercel sets it to the connecting client. x-forwarded-for's first
+// entry can be client-supplied on some hosts, so it's only a fallback.
+function clientIp(req: VercelRequest): string | undefined {
     const header = (name: string) => {
         const v = req.headers[name]
         return (Array.isArray(v) ? v[0] : v)?.split(",")[0]?.trim()
     }
-    return header("x-real-ip") || header("x-forwarded-for") || "unknown"
+    return header("x-real-ip") || header("x-forwarded-for") || undefined
 }
 
 // True if this request may proceed. Fails open: if Redis is unreachable we'd rather
@@ -172,8 +174,15 @@ function clientIp(req: VercelRequest) {
 async function withinRateLimit(req: VercelRequest) {
     const limiter = getRatelimit()
     if (!limiter) return true
+    const ip = clientIp(req)
+    // Without an IP, every such request would share one bucket and a few of them
+    // would lock everyone out, so skip limiting rather than guess.
+    if (!ip) {
+        console.warn("No client IP on request; skipping rate limit")
+        return true
+    }
     try {
-        const { success } = await limiter.limit(clientIp(req))
+        const { success } = await limiter.limit(ip)
         return success
     } catch (err) {
         console.error("Rate limit check failed; allowing request", err)

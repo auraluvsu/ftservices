@@ -304,6 +304,25 @@ describe("rate limiting", () => {
         expect(mocks.limit).toHaveBeenCalledWith("198.51.100.1")
     })
 
+    it("prefers x-real-ip over x-forwarded-for", async () => {
+        withUpstash()
+        await call(
+            mockReq(VALID, {
+                headers: { "x-real-ip": "203.0.113.7", "x-forwarded-for": "198.51.100.1" },
+            }),
+        )
+        expect(mocks.limit).toHaveBeenCalledWith("203.0.113.7")
+    })
+
+    it("skips limiting (rather than sharing one bucket) when no client IP is found", async () => {
+        withUpstash()
+        mocks.limit.mockResolvedValue({ success: false })
+        const res = await call(mockReq(VALID))
+        expect(mocks.limit).not.toHaveBeenCalled()
+        expect(res.statusCode).toBe(200)
+        expect(mocks.send).toHaveBeenCalledOnce()
+    })
+
     it("returns 429 with Retry-After and does not send when over the limit", async () => {
         withUpstash()
         mocks.limit.mockResolvedValue({ success: false })
@@ -323,7 +342,8 @@ describe("rate limiting", () => {
     it("fails open and still sends when Upstash is unreachable", async () => {
         withUpstash()
         mocks.limit.mockRejectedValue(new Error("fetch failed"))
-        const res = await call(mockReq(VALID))
+        const res = await call(mockReq(VALID, { headers: { "x-real-ip": "203.0.113.7" } }))
+        expect(mocks.limit).toHaveBeenCalledOnce()
         expect(res.statusCode).toBe(200)
         expect(mocks.send).toHaveBeenCalledOnce()
     })
