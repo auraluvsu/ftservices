@@ -1,10 +1,20 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
-import nodemailer from "nodemailer"
+import { Ratelimit } from "@upstash/ratelimit"
+import { Redis } from "@upstash/redis"
+import { Resend } from "resend"
 
 // Where inquiries are delivered (matches the address shown on the site).
 const INQUIRY_TO = process.env.INQUIRY_TO || "mike@ftserviceshayes.com"
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Sender address. Must be on a domain verified in Resend (ftserviceshayes.com is).
+// It doesn't need to be a real mailbox: Reply-To points at the customer.
+const INQUIRY_FROM =
+    process.env.INQUIRY_FROM || "FT Services Website <website@ftserviceshayes.com>"
+
+// Deliberately loose, but rejects characters that are special in address headers
+// (<>,;:"\()[]) so the value can only ever be a single plain address.
+// Keep in sync with the check in QuoteForm (src/App.tsx).
+const EMAIL_RE = /^[^\s@<>,;:"\\()[\]]+@[^\s@<>,;:"\\()[\]]+\.[^\s@<>,;:"\\()[\]]+$/
 
 const clean = (v: unknown, max: number) =>
     typeof v === "string" ? v.trim().slice(0, max) : ""
@@ -124,24 +134,63 @@ function buildHtml({
 </html>`
 }
 
-// Ethereal is a fake SMTP service: messages are captured, not delivered, and can
-// be viewed via the preview URL. Use ETHEREAL_USER/ETHEREAL_PASS if set,
-// otherwise a throwaway account is generated per cold start.
-async function createTransport() {
-    let user = process.env.ETHEREAL_USER
-    let pass = process.env.ETHEREAL_PASS
-    if (!user || !pass) {
-        const account = await nodemailer.createTestAccount()
-        user = account.user
-        pass = account.pass
+// Created lazily so a missing key surfaces as a logged 500 rather than a crash at import.
+let resend: Resend | undefined
+function getResend() {
+    const key = process.env.RESEND_API_KEY
+    if (!key) throw new Error("RESEND_API_KEY is not set")
+    return (resend ??= new Resend(key))
+}
+
+// Per-IP limit, shared across function instances via Upstash Redis. Skipped when the
+// Upstash env vars aren't set (local dev), so it only applies once they're configured.
+const RATE_LIMIT = 5
+const RATE_WINDOW = "1 h"
+let ratelimit: Ratelimit | null | undefined
+function getRatelimit() {
+    if (ratelimit !== undefined) return ratelimit
+    const url = process.env.UPSTASH_REDIS_REST_URL
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN
+    if (!url || !token) {
+        console.warn("UPSTASH_REDIS_REST_URL/TOKEN not set; enquiries are not rate limited")
+        return (ratelimit = null)
     }
-    const transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false,
-        auth: { user, pass },
-    })
-    return { transporter, user }
+    return (ratelimit = new Ratelimit({
+        redis: new Redis({ url, token }),
+        limiter: Ratelimit.slidingWindow(RATE_LIMIT, RATE_WINDOW),
+        prefix: "ratelimit:inquiry",
+    }))
+}
+
+// Prefer x-real-ip: Vercel sets it to the connecting client. x-forwarded-for's first
+// entry can be client-supplied on some hosts, so it's only a fallback.
+function clientIp(req: VercelRequest): string | undefined {
+    const header = (name: string) => {
+        const v = req.headers[name]
+        return (Array.isArray(v) ? v[0] : v)?.split(",")[0]?.trim()
+    }
+    return header("x-real-ip") || header("x-forwarded-for") || undefined
+}
+
+// True if this request may proceed. Fails open: if Redis is unreachable we'd rather
+// risk some spam than drop a genuine enquiry.
+async function withinRateLimit(req: VercelRequest) {
+    const limiter = getRatelimit()
+    if (!limiter) return true
+    const ip = clientIp(req)
+    // Without an IP, every such request would share one bucket and a few of them
+    // would lock everyone out, so skip limiting rather than guess.
+    if (!ip) {
+        console.warn("No client IP on request; skipping rate limit")
+        return true
+    }
+    try {
+        const { success } = await limiter.limit(ip)
+        return success
+    } catch (err) {
+        console.error("Rate limit check failed; allowing request", err)
+        return true
+    }
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -154,6 +203,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         string,
         unknown
     >
+    // Honeypot: the "website" field is hidden from people, so only bots fill it in.
+    // Pretend it worked so they don't learn to skip it.
+    if (clean(body.website, 200)) {
+        return res.status(200).json({ ok: true })
+    }
+
     const name = clean(body.name, 200)
     const email = clean(body.email, 320)
     const phone = clean(body.phone, 50)
@@ -163,18 +218,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: "Name, valid email and phone are required." })
     }
 
+    if (!(await withinRateLimit(req))) {
+        res.setHeader("Retry-After", "3600")
+        return res.status(429).json({ error: "Too many enquiries. Please try again later." })
+    }
+
     try {
-        const { transporter, user } = await createTransport()
-        const info = await transporter.sendMail({
-            from: `"FT Services website" <${user}>`,
+        const { data, error } = await getResend().emails.send({
+            from: INQUIRY_FROM,
             to: INQUIRY_TO,
-            replyTo: `"${name.replace(/["\r\n]/g, "")}" <${email}>`,
+            replyTo: email,
             subject: `New website enquiry from ${name.replace(/[\r\n]/g, " ")}`,
             text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\n${message || "(no message)"}`,
             html: buildHtml({ name, email, phone, message }),
         })
-        const previewUrl = nodemailer.getTestMessageUrl(info)
-        console.log("Inquiry sent (Ethereal). Preview:", previewUrl)
+        if (error) throw error
+        console.log("Inquiry sent via Resend:", data?.id)
         return res.status(200).json({ ok: true })
     } catch (err) {
         console.error("Failed to send inquiry", err)

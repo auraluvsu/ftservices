@@ -1,18 +1,19 @@
 # TODO
 
-## Replace Ethereal with a real email provider (Resend)
+## Finish the Resend setup
 
-Context: `api/inquiry.ts` currently sends through Ethereal (a fake SMTP service), so enquiries never reach `mike@ftserviceshayes.com`.
+Context: `api/inquiry.ts` now sends through Resend from `website@ftserviceshayes.com` (override with `INQUIRY_FROM`).
 
 Plan:
-- [ ] Create a Resend account and add the domain `ftserviceshayes.com`
-- [ ] Add the DNS records Resend provides (DKIM TXT, SPF TXT, MX on `send.` subdomain). Merge with any existing SPF record rather than adding a second one
+- [x] Create a Resend account and add the domain `ftserviceshayes.com`
+- [x] Add the DNS records Resend provides (DKIM TXT, SPF TXT, MX on `send.` subdomain). Merge with any existing SPF record rather than adding a second one
 - [ ] Create a send-only API key
-- [ ] Set Vercel env vars: `RESEND_API_KEY`, `INQUIRY_FROM` (e.g. `FT Services Website <website@ftserviceshayes.com>`), `INQUIRY_TO` (optional, defaults to mike@ftserviceshayes.com)
-- [ ] `npm i resend`; remove `nodemailer` and `@types/nodemailer`
-- [ ] Rewrite `createTransport()` / `sendMail` in `api/inquiry.ts` to `resend.emails.send({ from, to, replyTo: email, subject, text, html })`; delete the Ethereal code and the `getTestMessageUrl` log. Keep validation/escaping as is
-- [ ] Test before DNS verifies by sending from `onboarding@resend.dev` to the Resend signup address
-- [ ] Optional: spam protection on the public endpoint (honeypot field and/or rate limiting)
+- [ ] Swap `RESEND_API_KEY` for a sending-only key scoped to `ftserviceshayes.com`
+- [ ] At launch, set `RESEND_API_KEY`, `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in Vercel (`INQUIRY_FROM` and `INQUIRY_TO` are optional overrides). Create a free Upstash Redis database for the latter two
+- [x] `npm i resend`; remove `nodemailer` and `@types/nodemailer`
+- [x] Rewrite `createTransport()` / `sendMail` in `api/inquiry.ts` to `resend.emails.send({ from, to, replyTo: email, subject, text, html })`; delete the Ethereal code and the `getTestMessageUrl` log. Keep validation/escaping as is
+- [ ] Submit a real enquiry on the deployed site and confirm it lands in mike@ftserviceshayes.com (check spam too)
+- [x] Spam protection: honeypot field and per-IP rate limiting (Upstash)
 
 Notes:
 - The From address does not need to be a real mailbox; Reply-To already points at the customer.
@@ -22,7 +23,7 @@ Notes:
 
 E2E suite and CI are done (see `TESTING_PLAN.md`). Remaining:
 
-- [ ] API handler unit tests (after the Resend migration)
+- [x] API handler unit tests (`tests/inquiry.test.ts`)
 - [ ] `seo.spec.ts` (titles, favicon, no console errors)
 - [ ] Optional: Vitest component tests, visual regression
 

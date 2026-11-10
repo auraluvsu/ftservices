@@ -19,6 +19,7 @@ npm run dev
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the production build locally |
 | `npm run typecheck` | Type-check with `tsc --noEmit` |
+| `npm test` | Run the Vitest unit tests (API handler) |
 | `npm run format` | Format with oxfmt |
 | `npm run test:e2e` | Run the Playwright suite on all projects |
 | `npm run test:e2e:local` | Same, but skips WebKit (for distros missing its system libraries) |
@@ -43,19 +44,26 @@ Routing is client-side (`Link` + `popstate`) with no router library. Routes: `/`
 
 ### Quote form API
 
-`POST /api/inquiry` takes JSON `{ name, email, phone, message? }`. It returns `405` for other methods, `400` if name, a valid email or phone is missing, `200` on success and `500` if sending fails. Input is length-clamped, HTML-escaped and stripped of header-injection characters.
+`POST /api/inquiry` takes JSON `{ name, email, phone, message?, website? }`. It returns `405` for other methods, `400` if name, a valid email or phone is missing, `429` if the sender's IP is over the rate limit, `200` on success and `500` if sending fails. Input is length-clamped, HTML-escaped and stripped of header-injection characters.
 
-**Email delivery is not live yet.** The handler currently sends through Ethereal, a fake SMTP service, so enquiries are captured but never delivered. The planned switch to Resend is in [`todo.md`](todo.md). Optional env vars: `INQUIRY_TO` (recipient, defaults to `mike@ftserviceshayes.com`), `ETHEREAL_USER` and `ETHEREAL_PASS`.
+Email is sent through [Resend](https://resend.com). Env vars:
+
+- `RESEND_API_KEY` (required)
+- `INQUIRY_FROM` (sender; must be on a domain verified in Resend). Defaults to `FT Services Website <website@ftserviceshayes.com>`
+- `INQUIRY_TO` (recipient, defaults to `mike@ftserviceshayes.com`)
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (free Upstash Redis database). Enables the rate limit of 5 enquiries per IP per hour. If unset, enquiries are not rate limited; if Upstash is unreachable, requests are allowed through rather than dropped.
+
+Spam protection: `website` is a hidden honeypot field. If it's filled in, the handler returns `200` without sending anything.
 
 ## Testing
 
 End-to-end tests use Playwright with axe-core for accessibility. They run against the production build (`npm run build && npm run preview`) on Chromium, Firefox, WebKit, Pixel 7 and iPhone 14. `/api/inquiry` is always mocked, so tests never send email. Set `BASE_URL` to test an already-running deployment instead.
 
-There are no unit tests yet. See [`TESTING_PLAN.md`](TESTING_PLAN.md) for the plan and current status.
+Unit tests for the API handler live in `tests/inquiry.test.ts` (Vitest, with Resend and Upstash mocked). See [`TESTING_PLAN.md`](TESTING_PLAN.md) for the plan and current status.
 
 ## CI
 
-- `.github/workflows/test.yml` runs typecheck, build and the full Playwright suite on pull requests and pushes to `master`, and uploads the Playwright report.
+- `.github/workflows/test.yml` runs typecheck, build, unit tests and the full Playwright suite on pull requests and pushes to `master`, and uploads the Playwright report.
 - `.github/workflows/claude-review.yml` has Claude review each pull request, posting inline comments and a summary. Comment `@claude` on a PR to trigger it again. It needs the `CLAUDE_CODE_OAUTH_TOKEN` repository secret.
 
 ## Contributing notes

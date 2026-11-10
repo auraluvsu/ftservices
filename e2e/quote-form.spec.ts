@@ -42,7 +42,8 @@ test.describe("full form (contact page)", () => {
 
         const req = await request
         expect(req.method()).toBe("POST")
-        expect(req.postDataJSON()).toEqual(VALID_ENQUIRY)
+        // website is the honeypot; real users leave it empty.
+        expect(req.postDataJSON()).toEqual({ ...VALID_ENQUIRY, website: "" })
         await expect(page.getByRole("status")).toContainText("Thanks — we’ll be in touch.")
         expect(inquiry.requests).toHaveLength(1)
     })
@@ -108,6 +109,20 @@ test.describe("full form (contact page)", () => {
             await expect(page.getByRole("status")).toBeVisible()
         })
     }
+
+    test("HTTP 429 shows the rate-limit message with the phone number", async ({ page }) => {
+        await page.route("**/api/inquiry", (route) =>
+            route.fulfill({ status: 429, json: { error: "Too many enquiries." } }),
+        )
+        const form = fullForm(page)
+        await fillForm(form)
+        await form.getByRole("button", { name: /Request a free quote/ }).click()
+
+        const alert = form.getByRole("alert")
+        await expect(alert).toContainText("Please try again later")
+        await expect(alert).toContainText("07976 372870")
+        await expect(form.getByLabel("Name")).toHaveValue(VALID_ENQUIRY.name)
+    })
 
     test("network failure shows the alert", async ({ page }) => {
         await page.route("**/api/inquiry", (route) => route.abort("failed"))

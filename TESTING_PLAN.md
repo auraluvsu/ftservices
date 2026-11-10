@@ -4,7 +4,7 @@
 
 The site is a single large `src/App.tsx` (React 19 + Vite 8 + Tailwind v4) with hand-rolled client-side routing (`Link` + `popstate`) and one serverless endpoint (`api/inquiry.ts`). The highest-risk features are the quote form (sends leads), navigation/routing, the responsive header, and the Leaflet map.
 
-> **Status:** this was written as a plan and is now partly implemented. The e2e suite and CI are in place; unit tests are deferred. See "Decisions and status" at the bottom for what is done. Phases below describe the original plan, including parts we chose not to do yet.
+> **Status:** this was written as a plan and is now partly implemented. The e2e suite and CI are in place, plus Vitest unit tests for the API handler; component unit tests are deferred. See "Decisions and status" at the bottom for what is done. Phases below describe the original plan, including parts we chose not to do yet.
 
 ## Tooling decision
 
@@ -57,7 +57,7 @@ If you'd rather not refactor, Phase 2 can be skipped and E2E will cover the same
 
 **LocationMap** — mock `react-leaflet` (jsdom has no layout engine); assert it renders with the right marker coordinates/popup text. Real rendering is covered in E2E.
 
-**API handler** (`api/inquiry.test.ts`, node environment) — mock the mail client:
+**API handler** (`tests/inquiry.test.ts`, node environment) — done; mocks `resend` and `@upstash/ratelimit`:
 - Non-POST → 405 with `Allow: POST`.
 - Missing name/email/phone or invalid email → 400.
 - Valid body → mail client called with `to` = `INQUIRY_TO`, `replyTo` = customer, HTML-escaped content (`<script>` in message is escaped), CR/LF stripped from subject and reply-to name (header injection).
@@ -121,7 +121,8 @@ Add `.github/workflows/test.yml` (alongside `claude-review.yml`), on `pull_reque
 ## Decisions and status
 
 - Unknown URLs now render a real 404 page (`NotFoundPage`). ✅
-- E2E carries coverage for now; the component split and Vitest unit tests are deferred. ✅ (decided)
+- E2E carries coverage for now; the component split and component unit tests are deferred. ✅ (decided)
+- API handler unit tests (`tests/inquiry.test.ts`, Vitest) added after the Resend migration. ✅
 - Screenshot comparisons: skipped for now. ✅ (decided)
 - Done: Vercel SPA rewrite, `useId()` form ids, Playwright config, `e2e/` specs (navigation, 404, quote-form, mobile, map, accessibility, health).
 - Done: `.github/workflows/test.yml` (typecheck + build, and e2e on all browsers with report upload).
