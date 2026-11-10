@@ -8,11 +8,12 @@ Plan:
 - [x] Create a Resend account and add the domain `ftserviceshayes.com`
 - [x] Add the DNS records Resend provides (DKIM TXT, SPF TXT, MX on `send.` subdomain). Merge with any existing SPF record rather than adding a second one
 - [ ] Create a send-only API key
-- [ ] Set `RESEND_API_KEY` in Vercel (`INQUIRY_FROM` and `INQUIRY_TO` are optional overrides)
+- [ ] Swap `RESEND_API_KEY` for a sending-only key scoped to `ftserviceshayes.com`
+- [ ] At launch, set `RESEND_API_KEY`, `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in Vercel (`INQUIRY_FROM` and `INQUIRY_TO` are optional overrides). Create a free Upstash Redis database for the latter two
 - [x] `npm i resend`; remove `nodemailer` and `@types/nodemailer`
 - [x] Rewrite `createTransport()` / `sendMail` in `api/inquiry.ts` to `resend.emails.send({ from, to, replyTo: email, subject, text, html })`; delete the Ethereal code and the `getTestMessageUrl` log. Keep validation/escaping as is
 - [ ] Submit a real enquiry on the deployed site and confirm it lands in mike@ftserviceshayes.com (check spam too)
-- [ ] Optional: spam protection on the public endpoint (honeypot field and/or rate limiting)
+- [x] Spam protection: honeypot field and per-IP rate limiting (Upstash)
 
 Notes:
 - The From address does not need to be a real mailbox; Reply-To already points at the customer.

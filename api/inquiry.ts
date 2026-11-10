@@ -1,4 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
+import { Ratelimit } from "@upstash/ratelimit"
+import { Redis } from "@upstash/redis"
 import { Resend } from "resend"
 
 // Where inquiries are delivered (matches the address shown on the site).
@@ -137,6 +139,48 @@ function getResend() {
     return (resend ??= new Resend(key))
 }
 
+// Per-IP limit, shared across function instances via Upstash Redis. Skipped when the
+// Upstash env vars aren't set (local dev), so it only applies once they're configured.
+const RATE_LIMIT = 5
+const RATE_WINDOW = "1 h"
+let ratelimit: Ratelimit | null | undefined
+function getRatelimit() {
+    if (ratelimit !== undefined) return ratelimit
+    const url = process.env.UPSTASH_REDIS_REST_URL
+    const token = process.env.UPSTASH_REDIS_REST_TOKEN
+    if (!url || !token) {
+        console.warn("UPSTASH_REDIS_REST_URL/TOKEN not set; enquiries are not rate limited")
+        return (ratelimit = null)
+    }
+    return (ratelimit = new Ratelimit({
+        redis: new Redis({ url, token }),
+        limiter: Ratelimit.slidingWindow(RATE_LIMIT, RATE_WINDOW),
+        prefix: "ratelimit:inquiry",
+    }))
+}
+
+function clientIp(req: VercelRequest) {
+    const header = (name: string) => {
+        const v = req.headers[name]
+        return (Array.isArray(v) ? v[0] : v)?.split(",")[0]?.trim()
+    }
+    return header("x-real-ip") || header("x-forwarded-for") || "unknown"
+}
+
+// True if this request may proceed. Fails open: if Redis is unreachable we'd rather
+// risk some spam than drop a genuine enquiry.
+async function withinRateLimit(req: VercelRequest) {
+    const limiter = getRatelimit()
+    if (!limiter) return true
+    try {
+        const { success } = await limiter.limit(clientIp(req))
+        return success
+    } catch (err) {
+        console.error("Rate limit check failed; allowing request", err)
+        return true
+    }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== "POST") {
         res.setHeader("Allow", "POST")
@@ -147,6 +191,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         string,
         unknown
     >
+    // Honeypot: the "website" field is hidden from people, so only bots fill it in.
+    // Pretend it worked so they don't learn to skip it.
+    if (clean(body.website, 200)) {
+        return res.status(200).json({ ok: true })
+    }
+
     const name = clean(body.name, 200)
     const email = clean(body.email, 320)
     const phone = clean(body.phone, 50)
@@ -154,6 +204,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!name || !EMAIL_RE.test(email) || !phone) {
         return res.status(400).json({ error: "Name, valid email and phone are required." })
+    }
+
+    if (!(await withinRateLimit(req))) {
+        res.setHeader("Retry-After", "3600")
+        return res.status(429).json({ error: "Too many enquiries. Please try again later." })
     }
 
     try {

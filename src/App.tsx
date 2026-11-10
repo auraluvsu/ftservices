@@ -463,6 +463,12 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(Object.fromEntries(data)),
             })
+            if (res.status === 429) {
+                setSubmitError(
+                    "You’ve sent several enquiries already. Please try again later, or call 07976 372870.",
+                )
+                return
+            }
             if (!res.ok) throw new Error(String(res.status))
             setSent(true)
         } catch {
@@ -541,6 +547,17 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
                     />
                 </div>
             )}
+            {/* Honeypot: hidden from people and assistive tech; bots that fill it are ignored. */}
+            <div className="form-honeypot" aria-hidden="true">
+                <label htmlFor={`${uid}-website`}>Website</label>
+                <input
+                    id={`${uid}-website`}
+                    name="website"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                />
+            </div>
             {submitError && (
                 <span className="field__error" role="alert">
                     {submitError}

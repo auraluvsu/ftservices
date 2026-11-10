@@ -43,13 +43,16 @@ Routing is client-side (`Link` + `popstate`) with no router library. Routes: `/`
 
 ### Quote form API
 
-`POST /api/inquiry` takes JSON `{ name, email, phone, message? }`. It returns `405` for other methods, `400` if name, a valid email or phone is missing, `200` on success and `500` if sending fails. Input is length-clamped, HTML-escaped and stripped of header-injection characters.
+`POST /api/inquiry` takes JSON `{ name, email, phone, message?, website? }`. It returns `405` for other methods, `400` if name, a valid email or phone is missing, `429` if the sender's IP is over the rate limit, `200` on success and `500` if sending fails. Input is length-clamped, HTML-escaped and stripped of header-injection characters.
 
 Email is sent through [Resend](https://resend.com). Env vars:
 
 - `RESEND_API_KEY` (required)
 - `INQUIRY_FROM` (sender; must be on a domain verified in Resend). Defaults to `FT Services Website <website@ftserviceshayes.com>`
 - `INQUIRY_TO` (recipient, defaults to `mike@ftserviceshayes.com`)
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (free Upstash Redis database). Enables the rate limit of 5 enquiries per IP per hour. If unset, enquiries are not rate limited; if Upstash is unreachable, requests are allowed through rather than dropped.
+
+Spam protection: `website` is a hidden honeypot field. If it's filled in, the handler returns `200` without sending anything.
 
 ## Testing
 

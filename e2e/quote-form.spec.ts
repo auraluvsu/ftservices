@@ -42,7 +42,8 @@ test.describe("full form (contact page)", () => {
 
         const req = await request
         expect(req.method()).toBe("POST")
-        expect(req.postDataJSON()).toEqual(VALID_ENQUIRY)
+        // website is the honeypot; real users leave it empty.
+        expect(req.postDataJSON()).toEqual({ ...VALID_ENQUIRY, website: "" })
         await expect(page.getByRole("status")).toContainText("Thanks — we’ll be in touch.")
         expect(inquiry.requests).toHaveLength(1)
     })

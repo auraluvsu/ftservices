@@ -173,6 +173,7 @@
 .field input[aria-invalid="true"] { border-color: #b42318; }
 .field__error { color: #b42318; font-size: 11px; font-weight: 600; }
 .form-submit { margin-top: 3px; }
+.form-honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .form-note { margin: -7px 0 0; text-align: center; color: #777; font-size: 10px; }
 .form-success { padding: 42px 20px; color: var(--ink); text-align: center; }
 .form-success > span { width: 60px; height: 60px; margin: 0 auto 18px; display: grid; place-items: center; border-radius: 50%; color: #fff; background: var(--orange); }
