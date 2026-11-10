@@ -23,7 +23,7 @@ Notes:
 
 E2E suite and CI are done (see `TESTING_PLAN.md`). Remaining:
 
-- [ ] API handler unit tests (after the Resend migration)
+- [x] API handler unit tests (`tests/inquiry.test.ts`)
 - [ ] `seo.spec.ts` (titles, favicon, no console errors)
 - [ ] Optional: Vitest component tests, visual regression
 

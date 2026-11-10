@@ -19,6 +19,7 @@ npm run dev
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the production build locally |
 | `npm run typecheck` | Type-check with `tsc --noEmit` |
+| `npm test` | Run the Vitest unit tests (API handler) |
 | `npm run format` | Format with oxfmt |
 | `npm run test:e2e` | Run the Playwright suite on all projects |
 | `npm run test:e2e:local` | Same, but skips WebKit (for distros missing its system libraries) |
@@ -58,11 +59,11 @@ Spam protection: `website` is a hidden honeypot field. If it's filled in, the ha
 
 End-to-end tests use Playwright with axe-core for accessibility. They run against the production build (`npm run build && npm run preview`) on Chromium, Firefox, WebKit, Pixel 7 and iPhone 14. `/api/inquiry` is always mocked, so tests never send email. Set `BASE_URL` to test an already-running deployment instead.
 
-There are no unit tests yet. See [`TESTING_PLAN.md`](TESTING_PLAN.md) for the plan and current status.
+Unit tests for the API handler live in `tests/inquiry.test.ts` (Vitest, with Resend and Upstash mocked). See [`TESTING_PLAN.md`](TESTING_PLAN.md) for the plan and current status.
 
 ## CI
 
-- `.github/workflows/test.yml` runs typecheck, build and the full Playwright suite on pull requests and pushes to `master`, and uploads the Playwright report.
+- `.github/workflows/test.yml` runs typecheck, build, unit tests and the full Playwright suite on pull requests and pushes to `master`, and uploads the Playwright report.
 - `.github/workflows/claude-review.yml` has Claude review each pull request, posting inline comments and a summary. Comment `@claude` on a PR to trigger it again. It needs the `CLAUDE_CODE_OAUTH_TOKEN` repository secret.
 
 ## Contributing notes
