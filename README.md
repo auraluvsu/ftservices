@@ -45,7 +45,11 @@ Routing is client-side (`Link` + `popstate`) with no router library. Routes: `/`
 
 `POST /api/inquiry` takes JSON `{ name, email, phone, message? }`. It returns `405` for other methods, `400` if name, a valid email or phone is missing, `200` on success and `500` if sending fails. Input is length-clamped, HTML-escaped and stripped of header-injection characters.
 
-**Email delivery is not live yet.** The handler currently sends through Ethereal, a fake SMTP service, so enquiries are captured but never delivered. The planned switch to Resend is in [`todo.md`](todo.md). Optional env vars: `INQUIRY_TO` (recipient, defaults to `mike@ftserviceshayes.com`), `ETHEREAL_USER` and `ETHEREAL_PASS`.
+Email is sent through [Resend](https://resend.com). Env vars:
+
+- `RESEND_API_KEY` (required)
+- `INQUIRY_FROM` (sender; must be on a domain verified in Resend). Defaults to `FT Services Website <website@ftserviceshayes.com>`
+- `INQUIRY_TO` (recipient, defaults to `mike@ftserviceshayes.com`)
 
 ## Testing
 

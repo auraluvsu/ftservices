@@ -19,7 +19,7 @@ Run `npm run typecheck` and `npm run test:e2e:local` before opening a PR.
 - `src/main.tsx` – entrypoint; mounts `App` and imports `src/index.css`
 - `src/App.tsx` – all pages and components; hand-rolled routing (`Link` + `popstate`, no router library). Unknown paths render `NotFoundPage`
 - `src/index.css` – global CSS and Tailwind import
-- `api/inquiry.ts` – Vercel serverless function for the quote form (currently Ethereal; Resend migration planned in `todo.md`)
+- `api/inquiry.ts` – Vercel serverless function for the quote form (sends via Resend; needs `RESEND_API_KEY`)
 - `e2e/` – Playwright specs; `e2e/fixtures.ts` holds shared helpers and the `/api/inquiry` mock
 - `playwright.config.ts` – projects: chromium, firefox, webkit, mobile-chrome (Pixel 7), mobile-safari (iPhone 14)
 - `index.html` – Vite HTML shell (favicon: `public/image_c0ba5da2.ico`)

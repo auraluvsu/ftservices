@@ -1,8 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
-import nodemailer from "nodemailer"
+import { Resend } from "resend"
 
 // Where inquiries are delivered (matches the address shown on the site).
 const INQUIRY_TO = process.env.INQUIRY_TO || "mike@ftserviceshayes.com"
+
+// Sender address. Must be on a domain verified in Resend (ftserviceshayes.com is).
+// It doesn't need to be a real mailbox: Reply-To points at the customer.
+const INQUIRY_FROM =
+    process.env.INQUIRY_FROM || "FT Services Website <website@ftserviceshayes.com>"
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -124,24 +129,12 @@ function buildHtml({
 </html>`
 }
 
-// Ethereal is a fake SMTP service: messages are captured, not delivered, and can
-// be viewed via the preview URL. Use ETHEREAL_USER/ETHEREAL_PASS if set,
-// otherwise a throwaway account is generated per cold start.
-async function createTransport() {
-    let user = process.env.ETHEREAL_USER
-    let pass = process.env.ETHEREAL_PASS
-    if (!user || !pass) {
-        const account = await nodemailer.createTestAccount()
-        user = account.user
-        pass = account.pass
-    }
-    const transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false,
-        auth: { user, pass },
-    })
-    return { transporter, user }
+// Created lazily so a missing key surfaces as a logged 500 rather than a crash at import.
+let resend: Resend | undefined
+function getResend() {
+    const key = process.env.RESEND_API_KEY
+    if (!key) throw new Error("RESEND_API_KEY is not set")
+    return (resend ??= new Resend(key))
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -164,17 +157,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-        const { transporter, user } = await createTransport()
-        const info = await transporter.sendMail({
-            from: `"FT Services website" <${user}>`,
+        const { data, error } = await getResend().emails.send({
+            from: INQUIRY_FROM,
             to: INQUIRY_TO,
             replyTo: `"${name.replace(/["\r\n]/g, "")}" <${email}>`,
             subject: `New website enquiry from ${name.replace(/[\r\n]/g, " ")}`,
             text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\n${message || "(no message)"}`,
             html: buildHtml({ name, email, phone, message }),
         })
-        const previewUrl = nodemailer.getTestMessageUrl(info)
-        console.log("Inquiry sent (Ethereal). Preview:", previewUrl)
+        if (error) throw error
+        console.log("Inquiry sent via Resend:", data?.id)
         return res.status(200).json({ ok: true })
     } catch (err) {
         console.error("Failed to send inquiry", err)

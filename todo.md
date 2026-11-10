@@ -1,17 +1,17 @@
 # TODO
 
-## Replace Ethereal with a real email provider (Resend)
+## Finish the Resend setup
 
-Context: `api/inquiry.ts` currently sends through Ethereal (a fake SMTP service), so enquiries never reach `mike@ftserviceshayes.com`.
+Context: `api/inquiry.ts` now sends through Resend from `website@ftserviceshayes.com` (override with `INQUIRY_FROM`).
 
 Plan:
-- [ ] Create a Resend account and add the domain `ftserviceshayes.com`
-- [ ] Add the DNS records Resend provides (DKIM TXT, SPF TXT, MX on `send.` subdomain). Merge with any existing SPF record rather than adding a second one
+- [x] Create a Resend account and add the domain `ftserviceshayes.com`
+- [x] Add the DNS records Resend provides (DKIM TXT, SPF TXT, MX on `send.` subdomain). Merge with any existing SPF record rather than adding a second one
 - [ ] Create a send-only API key
-- [ ] Set Vercel env vars: `RESEND_API_KEY`, `INQUIRY_FROM` (e.g. `FT Services Website <website@ftserviceshayes.com>`), `INQUIRY_TO` (optional, defaults to mike@ftserviceshayes.com)
-- [ ] `npm i resend`; remove `nodemailer` and `@types/nodemailer`
-- [ ] Rewrite `createTransport()` / `sendMail` in `api/inquiry.ts` to `resend.emails.send({ from, to, replyTo: email, subject, text, html })`; delete the Ethereal code and the `getTestMessageUrl` log. Keep validation/escaping as is
-- [ ] Test before DNS verifies by sending from `onboarding@resend.dev` to the Resend signup address
+- [ ] Set `RESEND_API_KEY` in Vercel (`INQUIRY_FROM` and `INQUIRY_TO` are optional overrides)
+- [x] `npm i resend`; remove `nodemailer` and `@types/nodemailer`
+- [x] Rewrite `createTransport()` / `sendMail` in `api/inquiry.ts` to `resend.emails.send({ from, to, replyTo: email, subject, text, html })`; delete the Ethereal code and the `getTestMessageUrl` log. Keep validation/escaping as is
+- [ ] Submit a real enquiry on the deployed site and confirm it lands in mike@ftserviceshayes.com (check spam too)
 - [ ] Optional: spam protection on the public endpoint (honeypot field and/or rate limiting)
 
 Notes:
