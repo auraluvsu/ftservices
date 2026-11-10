@@ -449,7 +449,8 @@ function QuoteForm({ compact = false }: { compact?: boolean }) {
         const next: Record<string, string> = {}
         if (!String(data.get("name") || "").trim())
             next.name = "Please enter your name."
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(data.get("email") || "")))
+        // Same check as EMAIL_RE in api/inquiry.ts.
+        if (!/^[^\s@<>,;:"\\()[\]]+@[^\s@<>,;:"\\()[\]]+\.[^\s@<>,;:"\\()[\]]+$/.test(String(data.get("email") || "")))
             next.email = "Enter a valid email address."
         if (!String(data.get("phone") || "").trim())
             next.phone = "Please enter your phone number."

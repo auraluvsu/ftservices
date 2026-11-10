@@ -11,7 +11,10 @@ const INQUIRY_TO = process.env.INQUIRY_TO || "mike@ftserviceshayes.com"
 const INQUIRY_FROM =
     process.env.INQUIRY_FROM || "FT Services Website <website@ftserviceshayes.com>"
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Deliberately loose, but rejects characters that are special in address headers
+// (<>,;:"\()[]) so the value can only ever be a single plain address.
+// Keep in sync with the check in QuoteForm (src/App.tsx).
+const EMAIL_RE = /^[^\s@<>,;:"\\()[\]]+@[^\s@<>,;:"\\()[\]]+\.[^\s@<>,;:"\\()[\]]+$/
 
 const clean = (v: unknown, max: number) =>
     typeof v === "string" ? v.trim().slice(0, max) : ""
@@ -224,7 +227,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { data, error } = await getResend().emails.send({
             from: INQUIRY_FROM,
             to: INQUIRY_TO,
-            replyTo: `"${name.replace(/["\r\n]/g, "")}" <${email}>`,
+            replyTo: email,
             subject: `New website enquiry from ${name.replace(/[\r\n]/g, " ")}`,
             text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\n${message || "(no message)"}`,
             html: buildHtml({ name, email, phone, message }),

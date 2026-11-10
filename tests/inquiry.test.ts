@@ -128,11 +128,19 @@ describe("method handling", () => {
 })
 
 describe("validation", () => {
-    it.each([
+    it.each<[string, unknown]>([
         ["missing name", { ...VALID, name: "" }],
         ["whitespace-only name", { ...VALID, name: "   " }],
         ["missing email", { ...VALID, email: "" }],
         ["invalid email", { ...VALID, email: "not-an-email" }],
+        ...["<", ">", ",", ";", ":", '"', "\\", "(", ")", "[", "]"].map(
+            (c): [string, unknown] => [
+                `email containing ${c}`,
+                { ...VALID, email: `ja${c}ne@example.com` },
+            ],
+        ),
+        ["multiple addresses", { ...VALID, email: "a,jane@example.com" }],
+        ["display-name form", { ...VALID, email: "Evil <evil@example.com>" }],
         ["missing phone", { ...VALID, phone: "" }],
         ["non-string fields", { ...VALID, name: 42 }],
     ])("returns 400 for %s", async (_, body) => {
@@ -169,7 +177,7 @@ describe("sending", () => {
         const email = sentEmail()
         expect(email.from).toBe("FT Services Website <website@ftserviceshayes.com>")
         expect(email.to).toBe("mike@ftserviceshayes.com")
-        expect(email.replyTo).toBe('"Jane Tester" <jane@example.com>')
+        expect(email.replyTo).toBe("jane@example.com")
         expect(email.subject).toBe("New website enquiry from Jane Tester")
         expect(email.text).toBe(
             "Name: Jane Tester\nEmail: jane@example.com\nPhone: 07000 000000\n\n" +
@@ -190,7 +198,7 @@ describe("sending", () => {
 
     it("trims fields", async () => {
         await call(mockReq({ ...VALID, name: "  Jane Tester  ", email: " jane@example.com " }))
-        expect(sentEmail().replyTo).toBe('"Jane Tester" <jane@example.com>')
+        expect(sentEmail().replyTo).toBe("jane@example.com")
     })
 
     it("clamps field lengths (name 200, message 5000)", async () => {
@@ -216,13 +224,12 @@ describe("sending", () => {
         expect(html).toContain("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;")
     })
 
-    it("strips CR/LF and quotes from header fields to prevent header injection", async () => {
+    it("strips CR/LF from the subject", async () => {
         await call(mockReq({ ...VALID, name: 'Jane\r\nBcc: evil@example.com "x' }))
         const { subject, replyTo } = sentEmail()
-        expect(subject).not.toMatch(/[\r\n]/)
         expect(subject).toBe('New website enquiry from Jane  Bcc: evil@example.com "x')
-        expect(replyTo).not.toMatch(/[\r\n]/)
-        expect(replyTo).toBe('"JaneBcc: evil@example.com x" <jane@example.com>')
+        // The name never reaches Reply-To; it's the bare customer address.
+        expect(replyTo).toBe("jane@example.com")
     })
 })
 
