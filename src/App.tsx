@@ -8,12 +8,10 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png"
 
 const ORANGE = "#F56300"
 const heroImage = "/hero.jpg"
-const warehouseImage = "/warehouse.jpg"
+const usedImage = "/used.jpg"
 const outdoorImage = "/outdoor.jpg"
 const dieselImage = "/diesel.jpg"
 const lowAngleImage = "/lowangle.jpg"
-const stackerImage = "/stacker.jpg"
-const palletImage = "/pallet.jpg"
 const clampImage = "/clamp.jpg"
 const f20Image = "/f20.jpg"
 
@@ -616,7 +614,7 @@ const serviceCards = [
         text: "Quality used trucks for practical performance and dependable value.",
         icon: "truck" as IconName,
         path: "/used-forklifts",
-        image: warehouseImage,
+        image: usedImage,
     },
     {
         title: "Luigong forklifts",
@@ -630,7 +628,7 @@ const serviceCards = [
         text: "Flexible options for short-term demand and long-term planning.",
         icon: "calendar" as IconName,
         path: "/forklift-hire",
-        image: palletImage,
+        image: outdoorImage,
     },
     {
         title: "Servicing & repairs",
@@ -639,22 +637,16 @@ const serviceCards = [
         path: "/forklift-services",
         image: lowAngleImage,
     },
-    {
-        title: "Training",
-        text: "Practical forklift training delivered with safety at its core.",
-        icon: "users" as IconName,
-        path: "/forklift-services",
-        image: stackerImage,
-    },
 ]
 
 function Home() {
     const trusts = [
         { icon: "award" as IconName, top: "CFTS", bottom: "Accredited" },
-        { icon: "calendar" as IconName, top: "17+ years", bottom: "Experience" },
+        { icon: "calendar" as IconName, top: "30+ years", bottom: "Experience" },
+        { icon: "check" as IconName, top: "3-year warranty", bottom: "Parts & labour, all forklifts" },
         {
             icon: "shield" as IconName,
-            top: "Toyota Materials Handling",
+            top: "Liugong Materials Handling",
             bottom: "Supply partner",
         },
         {
@@ -795,7 +787,7 @@ function Home() {
                                 [
                                     "03",
                                     "One trusted team",
-                                    "Sales, hire, leasing, servicing and training — coordinated by people you know.",
+                                    "Sales, hire, leasing and servicing — coordinated by people you know.",
                                 ],
                             ].map(([no, title, text], i) => (
                                 <Reveal delay={i * 60} key={title} className="benefit-card">
@@ -993,7 +985,7 @@ const pageData: Record<string, {
             "LPG",
             "Short-term Needs",
         ],
-        image: warehouseImage,
+        image: usedImage,
     },
     "/forklift-services": {
         eyebrow: "Service & support",
@@ -1008,7 +1000,6 @@ const pageData: Record<string, {
             "Thorough Examinations",
             "Fleet Support",
             "Parts & Advice",
-            "Training",
         ],
         image: lowAngleImage,
     },
@@ -1027,7 +1018,7 @@ const pageData: Record<string, {
             "Used Equipment",
             "Hire Options",
         ],
-        image: dieselImage,
+        image: usedImage,
     },
     "/electric-forklifts": {
         eyebrow: "Electric forklifts",
@@ -1044,7 +1035,7 @@ const pageData: Record<string, {
             "Stackers",
             "Warehouse Equipment",
         ],
-        image: outdoorImage,
+        image: usedImage,
     },
 }
 
@@ -1162,7 +1153,51 @@ function StickyQuote() {
     )
 }
 
-function StandardInnerPage({ data }: { data: typeof pageData[string] }) {
+const warranties = [
+    {
+        value: "3 years",
+        title: "Parts & labour",
+        text: "Warranty on all forklifts.",
+    },
+    {
+        value: "2 years",
+        title: "Lithium-ion battery",
+        text: "Battery warranty by time.",
+    },
+    {
+        value: "10,000 hours",
+        title: "Lithium-ion battery",
+        text: "Battery warranty by working hours.",
+    },
+]
+
+function WarrantyBlock() {
+    return (
+        <Reveal>
+            <div className="warranty-block">
+                <span className="eyebrow">Peace of mind</span>
+                <h3>Warranty you can count on</h3>
+                <ul className="warranty-grid">
+                    {warranties.map((w) => (
+                        <li key={w.value}>
+                            <strong>{w.value}</strong>
+                            <span>{w.title}</span>
+                            <small>{w.text}</small>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </Reveal>
+    )
+}
+
+function StandardInnerPage({
+    data,
+    showWarranty = false,
+}: {
+    data: typeof pageData[string]
+    showWarranty?: boolean
+}) {
     const copyItems = [
         {
             title: "How we help you choose",
@@ -1177,7 +1212,7 @@ function StandardInnerPage({ data }: { data: typeof pageData[string] }) {
         {
             title: "Support beyond the sale",
             content:
-                "Our relationship does not end when equipment arrives. We can help with servicing, repairs, training and future fleet planning, keeping everything simple and joined up.",
+                "Our relationship does not end when equipment arrives. We can help with servicing, repairs and future fleet planning, keeping everything simple and joined up.",
         },
     ]
     return (
@@ -1231,6 +1266,7 @@ function StandardInnerPage({ data }: { data: typeof pageData[string] }) {
                             </p>
                         </div>
                     </Reveal>
+                    {showWarranty && <WarrantyBlock />}
                     <Reveal>
                         <Accordion items={copyItems} />
                     </Reveal>
@@ -1259,11 +1295,11 @@ function HirePage() {
             "Warehouse Trucks",
             "Fleet Cover",
         ],
-        image: palletImage,
+        image: outdoorImage,
     }
     return (
         <main>
-            <PageHero data={data} badge="From £45/day on 5+ year hire" />
+            <PageHero data={data} badge="Starting at £85/week on 5 year hire" />
             <section className="section page-shell inner-layout">
                 <div className="inner-content">
                     <Reveal>
@@ -1370,6 +1406,22 @@ function LuigongPage() {
                             text={data.intro}
                         />
                     </Reveal>
+                    <Reveal>
+                        <div className="news-callout">
+                            <span className="news-callout__icon">
+                                <Icon name="award" size={22} />
+                            </span>
+                            <div>
+                                <strong>Lithium-ion battery tech just got even better.</strong>
+                                <p>
+                                    Luigong lithium-ion batteries are now backed by a 2-year and
+                                    10,000-hour warranty. Ask us what the latest battery technology
+                                    could mean for your operation.
+                                </p>
+                            </div>
+                        </div>
+                    </Reveal>
+                    <WarrantyBlock />
                     <Reveal>
                         <div
                             className="spec-table-wrap"
@@ -1550,7 +1602,7 @@ function ContactPage() {
                                 <span>Helpful answers.</span>
                             </>
                         }
-                        text="Call, email or send an enquiry. We’ll help with sales, hire, servicing, training and general forklift advice."
+                        text="Call, email or send an enquiry. We’ll help with sales, hire, servicing and general forklift advice."
                     />
                     <div className="contact-list">
                         <a href="tel:07976372870">
@@ -1686,7 +1738,13 @@ export default function App() {
     else if (path === "/luigong-forklifts") page = <LuigongPage />
     else if (path === "/forklift-hire") page = <HirePage />
     else if (path === "/contact") page = <ContactPage />
-    else if (pageData[path]) page = <StandardInnerPage data={pageData[path]} />
+    else if (pageData[path])
+        page = (
+            <StandardInnerPage
+                data={pageData[path]}
+                showWarranty={path === "/new-forklifts"}
+            />
+        )
     else page = <NotFoundPage />
 
     return (

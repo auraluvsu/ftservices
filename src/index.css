@@ -100,7 +100,7 @@
 .hero__note strong { font-size: 13px; }
 .hero__note small { color: rgba(255,255,255,.68); font-size: 11px; }
 
-.trust-strip { position: relative; z-index: 3; display: grid; grid-template-columns: repeat(4, 1fr); margin-top: -1px; transform: translateY(50%); border-radius: 22px; background: #fff; box-shadow: var(--shadow); }
+.trust-strip { position: relative; z-index: 3; display: grid; grid-template-columns: repeat(5, 1fr); margin-top: -1px; transform: translateY(50%); border-radius: 22px; background: #fff; box-shadow: var(--shadow); }
 .trust-card { display: flex; align-items: center; gap: 14px; padding: 23px 26px; }
 .trust-card:not(:last-child) { border-right: 1px solid #e8e8e5; }
 .trust-card > span { width: 43px; height: 43px; display: grid; place-items: center; flex: none; border-radius: 14px; color: var(--orange-dark); background: #fff1e8; }
@@ -108,7 +108,10 @@
 .trust-card strong { font-size: 13px; line-height: 1.25; }
 .trust-card small { color: #6d6d6d; font-size: 11px; line-height: 1.3; }
 
-.service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.service-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 22px; }
+/* Three cards per row; a short last row of two is centred rather than left with a gap. */
+.service-grid > * { grid-column: span 2; }
+.service-grid > :nth-child(3n + 1):nth-last-child(2) { grid-column: 2 / span 2; }
 .service-card { height: 100%; display: block; overflow: hidden; border-radius: var(--radius); color: var(--ink); background: #fff; box-shadow: 0 8px 35px rgba(10,10,10,.08); text-decoration: none; transition: transform .3s ease, box-shadow .3s ease; }
 .service-card:hover { transform: translateY(-6px) scale(1.015); box-shadow: 0 20px 45px rgba(10,10,10,.13); }
 .service-card__image { position: relative; height: 205px; margin: 8px; overflow: hidden; border-radius: 17px; }
@@ -200,6 +203,18 @@
 .content-block { padding: 38px; border-radius: var(--radius); background: var(--soft); }
 .content-block h3 { margin-bottom: 17px; font-size: 26px; font-weight: 800; }
 .content-block p + p { margin-top: 15px; }
+.warranty-block { padding: 38px; border-radius: var(--radius); color: #fff; background: var(--ink); }
+.warranty-block .eyebrow { color: var(--orange); }
+.warranty-block h3 { margin: 10px 0 24px; font-size: 26px; font-weight: 800; }
+.warranty-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.warranty-grid li { display: flex; flex-direction: column; gap: 4px; padding: 20px; border-radius: 18px; background: rgba(255,255,255,.07); }
+.warranty-grid strong { color: var(--orange); font-size: 28px; font-weight: 800; line-height: 1.1; }
+.warranty-grid span { font-size: 14px; font-weight: 800; }
+.warranty-grid small { color: #c8c8c8; font-size: 12px; }
+.news-callout { display: flex; align-items: flex-start; gap: 16px; padding: 22px 24px; border: 1px solid #ffd5b8; border-radius: 20px; background: #fff4ec; }
+.news-callout__icon { width: 44px; height: 44px; display: grid; place-items: center; flex: none; border-radius: 14px; color: #fff; background: var(--orange-dark); }
+.news-callout strong { display: block; margin-bottom: 4px; color: var(--ink); font-size: 17px; font-weight: 800; }
+.news-callout p { margin: 0; font-size: 13px; }
 .sticky-quote { position: sticky; top: 100px; padding: 25px; border-radius: 24px; background: #fff; box-shadow: var(--shadow); }
 .sticky-quote__head { display: flex; align-items: center; gap: 12px; margin-bottom: 21px; }
 .sticky-quote__head > span { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; color: white; background: var(--orange); transform: rotate(-35deg); }
@@ -309,8 +324,10 @@
   .trust-card { padding: 18px 15px; }
   .trust-card:not(:last-child) { border-right: 0; }
   .trust-card:nth-child(odd) { border-right: 1px solid #e8e8e5; }
-  .trust-card:nth-child(-n+2) { border-bottom: 1px solid #e8e8e5; }
+  .trust-card:nth-child(-n+4) { border-bottom: 1px solid #e8e8e5; }
+  .trust-card:last-child:nth-child(odd) { grid-column: 1 / -1; border-right: 0; }
   .service-grid { grid-template-columns: 1fr; }
+  .service-grid > *, .service-grid > :nth-child(3n + 1):nth-last-child(2) { grid-column: auto; }
   .service-card__image { height: 230px; }
   .benefit-grid { grid-template-columns: 1fr; }
   .benefit-card > span { margin-bottom: 25px; }
@@ -355,6 +372,7 @@
   .chip-grid { grid-template-columns: 1fr 1fr; }
   .chip-grid > * { border-radius: 14px; }
   .process-grid { grid-template-columns: 1fr; }
+  .warranty-grid { grid-template-columns: 1fr; }
   .process-card h3 { min-height: 0; margin-top: 20px; }
   .content-block { padding: 28px 22px; }
   .footer { border-radius: 24px 24px 0 0; }
