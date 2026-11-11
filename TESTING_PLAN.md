@@ -51,7 +51,7 @@ If you'd rather not refactor, Phase 2 can be skipped and E2E will cover the same
 
 **Link / routing** — clicking a `Link` calls `preventDefault`, pushes history and updates the rendered page; `popstate` (back button) restores the previous page; scroll resets to top.
 
-**App routing** — each known path renders its page heading (`/`, `/new-forklifts`, `/used-forklifts`, `/forklift-services`, `/diesel-forklifts`, `/electric-forklifts`, `/forklift-hire`, `/luigong-forklifts`, `/contact`). Unknown path falls back to `/new-forklifts` content (document this as intended behaviour or change it to a 404 page).
+**App routing** — each known path renders its page heading (`/`, `/new-forklifts`, `/used-forklifts`, `/forklift-services`, `/diesel-forklifts`, `/electric-forklifts`, `/forklift-hire`, `/liugong-forklifts`, `/contact`). Unknown path falls back to `/new-forklifts` content (document this as intended behaviour or change it to a 404 page).
 
 **Accordion** — first item open by default; clicking another opens it and closes the first.
 

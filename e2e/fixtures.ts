@@ -9,7 +9,7 @@ export const ROUTES = [
     { path: "/diesel-forklifts", h1: "Diesel forklifts for demanding work." },
     { path: "/electric-forklifts", h1: "Clean, capable electric forklifts." },
     { path: "/forklift-hire", h1: "The equipment you need, for as long as you need it." },
-    { path: "/luigong-forklifts", h1: "Capable trucks. Straightforward local support." },
+    { path: "/liugong-forklifts", h1: "Capable trucks. Straightforward local support." },
     { path: "/contact", h1: "Let’s get your operation moving." },
 ] as const
 

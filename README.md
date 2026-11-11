@@ -40,7 +40,7 @@ vercel.json       build config and SPA rewrite
 
 ### Routing
 
-Routing is client-side (`Link` + `popstate`) with no router library. Routes: `/`, `/new-forklifts`, `/used-forklifts`, `/diesel-forklifts`, `/electric-forklifts`, `/forklift-services`, `/forklift-hire`, `/luigong-forklifts`, `/contact`. Anything else renders the 404 page. `vercel.json` rewrites every non-`/api/` path to `index.html` so deep links and refreshes work.
+Routing is client-side (`Link` + `popstate`) with no router library. Routes: `/`, `/new-forklifts`, `/used-forklifts`, `/diesel-forklifts`, `/electric-forklifts`, `/forklift-services`, `/forklift-hire`, `/liugong-forklifts`, `/contact`. Anything else renders the 404 page. `vercel.json` rewrites every non-`/api/` path to `index.html` so deep links and refreshes work.
 
 ### Quote form API
 
