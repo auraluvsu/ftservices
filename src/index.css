@@ -43,14 +43,16 @@
 .header--scrolled { height: 74px; box-shadow: 0 8px 32px rgba(10,10,10,.08); }
 .header__inner { width: min(1380px, calc(100% - 40px)); margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .logo { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; color: var(--ink); flex: none; }
-.logo__mark { width: 43px; height: 43px; display: grid; place-items: center; background: var(--orange); border-radius: 14px; }
-.logo__mark img { width: 28px; height: 28px; object-fit: contain; }
+.logo__mark { display: block; flex: none; }
+.logo__mark img { display: block; width: auto; height: 40px; }
 .logo__text { display: flex; align-items: baseline; gap: 4px; font-size: 18px; letter-spacing: -.04em; }
 .logo__text strong { font-size: 24px; font-weight: 800; }
 .logo__text span { font-weight: 600; }
-.logo__wordmark { height: 22px; width: auto; display: block; mix-blend-mode: multiply; }
+.logo__wordmark { height: 27px; width: auto; display: block; mix-blend-mode: multiply; }
 .logo--light { color: #fff; }
-.logo--light .logo__wordmark { mix-blend-mode: normal; padding: 6px 10px; background: #fff; border-radius: 10px; height: 34px; box-sizing: border-box; }
+.logo--light .logo__wordmark { mix-blend-mode: normal; padding: 6px 10px; background: #fff; border-radius: 10px; height: 40px; box-sizing: border-box; }
+/* The forklift drawing has black lines; flip them to white on the dark footer. */
+.logo--light .logo__mark img { filter: invert(1); }
 .desktop-nav { display: flex; align-items: center; justify-content: center; gap: clamp(12px, 1.5vw, 25px); }
 .desktop-nav a { position: relative; color: #333; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .desktop-nav a::after { content: ''; position: absolute; left: 0; right: 100%; bottom: -8px; height: 2px; border-radius: 2px; background: var(--orange); transition: right .25s ease; }

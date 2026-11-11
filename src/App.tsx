@@ -164,7 +164,7 @@ function Logo({ light = false }: { light?: boolean }) {
             aria-label="FT Services home"
         >
             <span className="logo__mark">
-                <img src="/image_c0ba5da2.ico" alt="" width={43} height={43} />
+                <img src="/forklift-logo-black.png" alt="" width={221} height={144} />
             </span>
             <img
                 className="logo__wordmark"
