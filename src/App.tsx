@@ -116,7 +116,7 @@ const routeMap: Record<string, string> = {
     Home: "/",
     "New Forklifts": "/new-forklifts",
     "Used Forklifts": "/used-forklifts",
-    "Luigong Forklifts": "/luigong-forklifts",
+    "LiuGong Forklifts": "/liugong-forklifts",
     "Forklift Hire": "/forklift-hire",
     "Forklift Services": "/forklift-services",
     Contact: "/contact",
@@ -617,10 +617,10 @@ const serviceCards = [
         image: usedImage,
     },
     {
-        title: "Luigong forklifts",
+        title: "LiuGong forklifts",
         text: "A capable range of material handling equipment for modern sites.",
         icon: "forklift" as IconName,
-        path: "/luigong-forklifts",
+        path: "/liugong-forklifts",
         image: dieselImage,
     },
     {
@@ -646,7 +646,7 @@ function Home() {
         { icon: "check" as IconName, top: "3-year warranty", bottom: "Parts & labour, all forklifts" },
         {
             icon: "shield" as IconName,
-            top: "Liugong Materials Handling",
+            top: "LiuGong Materials Handling",
             bottom: "Supply partner",
         },
         {
@@ -1374,14 +1374,14 @@ function HirePage() {
     )
 }
 
-function LuigongPage() {
+function LiuGongPage() {
     const data = {
-        eyebrow: "Luigong forklifts",
+        eyebrow: "LiuGong forklifts",
         title: "Capable trucks. Straightforward local support.",
         summary:
-            "Explore the Luigong range with practical advice from an experienced independent forklift team.",
+            "Explore the LiuGong range with practical advice from an experienced independent forklift team.",
         intro:
-            "We help you assess the Luigong range against your loads, lift requirements and working environment, making it easier to narrow down the right model.",
+            "We help you assess the LiuGong range against your loads, lift requirements and working environment, making it easier to narrow down the right model.",
         chips: [
             "Electric Forklifts",
             "Diesel Forklifts",
@@ -1414,7 +1414,7 @@ function LuigongPage() {
                             <div>
                                 <strong>Lithium-ion battery tech just got even better.</strong>
                                 <p>
-                                    Luigong lithium-ion batteries are now backed by a 2-year and
+                                    LiuGong lithium-ion batteries are now backed by a 2-year and
                                     10,000-hour warranty. Ask us what the latest battery technology
                                     could mean for your operation.
                                 </p>
@@ -1426,7 +1426,7 @@ function LuigongPage() {
                         <div
                             className="spec-table-wrap"
                             role="region"
-                            aria-label="Luigong model specifications"
+                            aria-label="LiuGong model specifications"
                             tabIndex={0}
                         >
                             <table className="spec-table">
@@ -1499,7 +1499,7 @@ function LuigongPage() {
                             eyebrow="Common questions"
                             title={
                                 <>
-                                    Luigong forklift <span>FAQs.</span>
+                                    LiuGong forklift <span>FAQs.</span>
                                 </>
                             }
                         />
@@ -1508,7 +1508,7 @@ function LuigongPage() {
                         <Accordion
                             items={[
                                 {
-                                    title: "Which Luigong model is right for me?",
+                                    title: "Which LiuGong model is right for me?",
                                     content:
                                         "That depends on load capacity, lift height, working environment and daily use. Speak to our team and we will help narrow down the suitable options.",
                                 },
@@ -1684,7 +1684,7 @@ function Footer() {
                         <h4>Services</h4>
                         <Link to="/new-forklifts">New forklifts</Link>
                         <Link to="/used-forklifts">Used forklifts</Link>
-                        <Link to="/luigong-forklifts">Luigong forklifts</Link>
+                        <Link to="/liugong-forklifts">LiuGong forklifts</Link>
                         <Link to="/forklift-hire">Hire & leasing</Link>
                         <Link to="/forklift-services">Servicing & repairs</Link>
                     </div>
@@ -1722,11 +1722,27 @@ function Footer() {
     )
 }
 
+// Old URLs that moved. Vercel redirects these server-side (vercel.json); this covers
+// client-side and local dev.
+const movedPaths: Record<string, string> = {
+    "/luigong-forklifts": "/liugong-forklifts",
+}
+
+function currentPath() {
+    const path = window.location.pathname
+    const moved = movedPaths[path]
+    if (moved) {
+        window.history.replaceState(null, "", moved + window.location.search + window.location.hash)
+        return moved
+    }
+    return path
+}
+
 export default function App() {
-    const [path, setPath] = useState(window.location.pathname)
+    const [path, setPath] = useState(currentPath)
     useEffect(() => {
         const update = () => {
-            setPath(window.location.pathname)
+            setPath(currentPath())
             window.scrollTo({ top: 0, behavior: "instant" })
         }
         window.addEventListener("popstate", update)
@@ -1735,7 +1751,7 @@ export default function App() {
 
     let page: ReactNode
     if (path === "/") page = <Home />
-    else if (path === "/luigong-forklifts") page = <LuigongPage />
+    else if (path === "/liugong-forklifts") page = <LiuGongPage />
     else if (path === "/forklift-hire") page = <HirePage />
     else if (path === "/contact") page = <ContactPage />
     else if (pageData[path])

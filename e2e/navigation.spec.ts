@@ -11,6 +11,16 @@ test.describe("deep links", () => {
     }
 })
 
+test.describe("moved pages", () => {
+    test("the old misspelled LiuGong URL lands on the new page", async ({ page }) => {
+        await page.goto("/luigong-forklifts?ref=old#top")
+        await expect(page).toHaveURL("/liugong-forklifts?ref=old#top")
+        await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+            "Capable trucks. Straightforward local support.",
+        )
+    })
+})
+
 test.describe("desktop navigation", () => {
     test.beforeEach(({}, testInfo) => {
         test.skip(!!testInfo.project.use.isMobile, "desktop nav only")
@@ -25,7 +35,7 @@ test.describe("desktop navigation", () => {
         for (const [name, path] of [
             ["New Forklifts", "/new-forklifts"],
             ["Forklift Hire", "/forklift-hire"],
-            ["Luigong Forklifts", "/luigong-forklifts"],
+            ["LiuGong Forklifts", "/liugong-forklifts"],
             ["Forklift Services", "/forklift-services"],
             ["Contact", "/contact"],
         ] as const) {

@@ -369,7 +369,7 @@
   .inner-hero__actions { flex-direction: column; }
   .inner-hero__image { height: 305px; }
   .inner-hero__copy > p { font-size: 16px; }
-  /* "Straightforward" (Luigong page) is ~8em wide; 12vw overflowed phones <=412px. */
+  /* "Straightforward" (LiuGong page) is ~8em wide; 12vw overflowed phones <=412px. */
   .inner-hero__copy h1 { font-size: clamp(30px, 10vw, 66px); }
   .chip-grid { grid-template-columns: 1fr 1fr; }
   .chip-grid > * { border-radius: 14px; }
