@@ -15,6 +15,7 @@ const dieselImage2 = "/diesel-2.jpg"
 const lowAngleImage = "/lowangle.jpg"
 const clampImage = "/clamp.jpg"
 const f20Image = "/f20.jpg"
+const roughTerrainImage = "/rough-terrain.jpg"
 
 type IconName = "arrow" | "award" | "calendar" | "check" | "chevron" | "clock" | "close" | "forklift" | "location" | "mail" | "menu" | "phone" | "shield" | "tools" | "truck" | "users"
 
@@ -1491,29 +1492,19 @@ function LiuGongPage() {
                                 </thead>
                                 <tbody>
                                     {[
-                                        [
-                                            "Model options",
-                                            "Ask our team",
-                                            "Model dependent",
-                                            "Model dependent",
-                                        ],
-                                        [
-                                            "Electric range",
-                                            "Ask our team",
-                                            "Model dependent",
-                                            "Model dependent",
-                                        ],
-                                        [
-                                            "Diesel range",
-                                            "Ask our team",
-                                            "Model dependent",
-                                            "Model dependent",
-                                        ],
-                                    ].map((row) => (
-                                        <tr key={row[0]}>
-                                            {row.map((cell) => (
-                                                <td key={cell}>{cell}</td>
-                                            ))}
+                                        ["4-wheel electric range", "2,500–18,000kg"],
+                                        ["3-wheel electric range", "1,600–2,000kg"],
+                                        ["Diesel range", "2,000–16,000kg"],
+                                        ["Rough terrain range", "Ask our team", true],
+                                    ].map(([model, capacity, isNew]) => (
+                                        <tr key={String(model)}>
+                                            <td>
+                                                {model}
+                                                {isNew && <span className="spec-badge">New</span>}
+                                            </td>
+                                            <td>{capacity}</td>
+                                            <td>Model dependent</td>
+                                            <td>Model dependent</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -1523,6 +1514,24 @@ function LiuGongPage() {
                             Specifications vary by model and configuration. Contact us for
                             current product details.
                         </p>
+                    </Reveal>
+                    <Reveal>
+                        <div className="fleet-new">
+                            <img
+                                src={roughTerrainImage}
+                                alt="LiuGong rough terrain forklift with chunky off-road tyres"
+                                loading="lazy"
+                            />
+                            <div>
+                                <span className="spec-badge">New to the fleet</span>
+                                <h3>Rough terrain trucks</h3>
+                                <p>
+                                    LiuGong rough terrain forklifts are built for uneven ground,
+                                    yards and building sites. Capacities and specifications are
+                                    being confirmed, so ask our team for the latest details.
+                                </p>
+                            </div>
+                        </div>
                     </Reveal>
                     <div className="process-grid">
                         {[

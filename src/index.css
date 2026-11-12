@@ -221,6 +221,14 @@
 .news-callout__icon { width: 44px; height: 44px; display: grid; place-items: center; flex: none; border-radius: 14px; color: #fff; background: var(--orange-dark); }
 .news-callout strong { display: block; margin-bottom: 4px; color: var(--ink); font-size: 17px; font-weight: 800; }
 .news-callout p { margin: 0; font-size: 13px; }
+.spec-badge { display: inline-block; margin-left: 8px; padding: 3px 9px; border-radius: 999px; color: #fff; background: var(--orange-dark); font-size: 11px; font-weight: 800; letter-spacing: .02em; vertical-align: middle; }
+.fleet-new { display: grid; grid-template-columns: minmax(0, 260px) 1fr; align-items: center; gap: 28px; padding: 24px; border: 1px solid #e7e7e4; border-radius: 24px; background: #fff; }
+.fleet-new img { width: 100%; height: auto; display: block; }
+.fleet-new .spec-badge { margin-left: 0; }
+.fleet-new h3 { margin: 12px 0 8px; color: var(--ink); font-size: 22px; font-weight: 800; }
+.fleet-new p { margin: 0; font-size: 14px; }
+.spec-table td:nth-child(2) { white-space: nowrap; }
+@media (max-width: 640px) { .fleet-new { grid-template-columns: 1fr; text-align: center; } .fleet-new img { max-width: 260px; margin: 0 auto; } }
 .sticky-quote { position: sticky; top: 100px; padding: 25px; border-radius: 24px; background: #fff; box-shadow: var(--shadow); }
 .sticky-quote__head { display: flex; align-items: center; gap: 12px; margin-bottom: 21px; }
 .sticky-quote__head > span { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px; color: white; background: var(--orange); transform: rotate(-35deg); }
