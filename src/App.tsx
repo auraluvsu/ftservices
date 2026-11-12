@@ -694,7 +694,7 @@ function Home() {
     const trusts = [
         { icon: "award" as IconName, top: "CFTS", bottom: "Accredited" },
         { icon: "calendar" as IconName, top: "30+ years", bottom: "Experience" },
-        { icon: "check" as IconName, top: "3-year warranty", bottom: "Parts & labour, all forklifts" },
+        { icon: "check" as IconName, top: "3-year warranty", bottom: "Truck parts & labour, all forklifts" },
         {
             icon: "shield" as IconName,
             top: "LiuGong Materials Handling",
@@ -1207,18 +1207,18 @@ function StickyQuote() {
 const warranties = [
     {
         value: "3 years",
-        title: "Parts & labour",
+        title: "Truck parts & labour",
         text: "Warranty on all forklifts.",
     },
     {
         value: "2 years",
-        title: "Lithium-ion battery",
-        text: "Battery warranty by time.",
+        title: "Lithium-ion battery charger",
+        text: "Battery charger warranty.",
     },
     {
-        value: "10,000 hours",
+        value: "5 years or 10,000 hours",
         title: "Lithium-ion battery",
-        text: "Battery warranty by working hours.",
+        text: "Lithium-ion battery warranty.",
     },
 ]
 
