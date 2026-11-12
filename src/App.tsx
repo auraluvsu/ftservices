@@ -1068,7 +1068,7 @@ const pageData: Record<string, {
             "Used Equipment",
             "Hire Options",
         ],
-        image: usedImage,
+        image: dieselImage,
     },
     "/electric-forklifts": {
         eyebrow: "Electric forklifts",
@@ -1085,7 +1085,7 @@ const pageData: Record<string, {
             "Stackers",
             "Warehouse Equipment",
         ],
-        image: usedImage,
+        image: outdoorImage,
     },
 }
 
