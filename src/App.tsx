@@ -198,6 +198,48 @@ function Header({ path }: { path: string }) {
         }
     }, [open])
 
+    // Close on any navigation, including the browser back button.
+    useEffect(() => setOpen(false), [path])
+
+    // Close if the viewport grows past the mobile breakpoint (e.g. rotating a tablet),
+    // otherwise the hidden menu would leave the page scroll-locked.
+    useEffect(() => {
+        const mq = window.matchMedia("(max-width: 1180px)")
+        const onChange = () => !mq.matches && setOpen(false)
+        mq.addEventListener("change", onChange)
+        return () => mq.removeEventListener("change", onChange)
+    }, [])
+
+    // While open: focus the close button, close on Escape, and keep Tab inside the menu.
+    // On close, return focus to the menu button if it was inside the menu.
+    const menuButtonRef = useRef<HTMLButtonElement>(null)
+    const closeButtonRef = useRef<HTMLButtonElement>(null)
+    const panelRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        const panel = panelRef.current
+        if (!open || !panel) return
+        closeButtonRef.current?.focus()
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") return setOpen(false)
+            if (e.key !== "Tab") return
+            const focusable = panel.querySelectorAll<HTMLElement>("a[href], button")
+            const first = focusable[0]
+            const last = focusable[focusable.length - 1]
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault()
+                last.focus()
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault()
+                first.focus()
+            }
+        }
+        document.addEventListener("keydown", onKeyDown)
+        return () => {
+            document.removeEventListener("keydown", onKeyDown)
+            if (panel.contains(document.activeElement)) menuButtonRef.current?.focus()
+        }
+    }, [open])
+
     return (
         <header className={`header ${scrolled ? "header--scrolled" : ""}`}>
             <div className="header__inner">
@@ -278,21 +320,29 @@ function Header({ path }: { path: string }) {
                     </Link>
                 </div>
                 <button
+                    ref={menuButtonRef}
                     className="menu-button"
                     onClick={() => setOpen(true)}
                     aria-expanded={open}
+                    aria-controls="mobile-menu"
                     aria-label="Open menu"
                 >
                     <Icon name="menu" size={26} />
                 </button>
             </div>
             <div
+                ref={panelRef}
+                id="mobile-menu"
                 className={`mobile-menu ${open ? "mobile-menu--open" : ""}`}
-                aria-hidden={!open}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Menu"
+                inert={!open}
             >
                 <div className="mobile-menu__top">
                     <Logo />
                     <button
+                        ref={closeButtonRef}
                         className="menu-button"
                         onClick={() => setOpen(false)}
                         aria-label="Close menu"
@@ -371,7 +421,7 @@ function Header({ path }: { path: string }) {
                         to="/contact"
                         onClick={() => setOpen(false)}
                     >
-                        Get a quote
+                        Get a quote <Icon name="arrow" size={17} />
                     </Link>
                 </div>
             </div>
