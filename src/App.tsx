@@ -11,6 +11,7 @@ const heroImage = "/hero.jpg"
 const usedImage = "/used.jpg"
 const outdoorImage = "/outdoor.jpg"
 const dieselImage = "/diesel.jpg"
+const dieselImage2 = "/diesel-2.jpg"
 const lowAngleImage = "/lowangle.jpg"
 const clampImage = "/clamp.jpg"
 const f20Image = "/f20.jpg"
@@ -1068,7 +1069,7 @@ const pageData: Record<string, {
             "Used Equipment",
             "Hire Options",
         ],
-        image: dieselImage,
+        image: dieselImage2,
     },
     "/electric-forklifts": {
         eyebrow: "Electric forklifts",
