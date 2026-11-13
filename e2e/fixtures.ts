@@ -31,6 +31,11 @@ export const test = base.extend<{ inquiry: { requests: unknown[] } }>({
             if (url.startsWith(baseURL!) || url.startsWith("data:")) return route.fallback()
             return route.abort()
         })
+        // Vercel Web Analytics: the script only exists on Vercel, so stub it out
+        // (under `vite preview` it would hit the SPA fallback and log a MIME error).
+        await page.route("**/_vercel/insights/**", (route) =>
+            route.fulfill({ status: 200, contentType: "text/javascript", body: "" }),
+        )
         await use(page)
     },
     // Default mock for the enquiry endpoint: records bodies, returns 200.

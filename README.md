@@ -55,6 +55,10 @@ Email is sent through [Resend](https://resend.com). Env vars:
 
 Spam protection: `website` is a hidden honeypot field. If it's filled in, the handler returns `200` without sending anything.
 
+## Analytics
+
+[Vercel Web Analytics](https://vercel.com/docs/analytics) is mounted in `src/main.tsx` via `<Analytics />` from `@vercel/analytics/react`. It records page views, including client-side navigations (the script hooks `history.pushState`, which `Link` uses). Enable it in the Vercel dashboard under the project's **Analytics** tab; data appears after the next deploy. In `npm run dev` it only logs events to the console. E2e tests stub `/_vercel/insights/*`.
+
 ## Testing
 
 End-to-end tests use Playwright with axe-core for accessibility. They run against the production build (`npm run build && npm run preview`) on Chromium, Firefox, WebKit, Pixel 7 and iPhone 14. `/api/inquiry` is always mocked, so tests never send email. Set `BASE_URL` to test an already-running deployment instead.
